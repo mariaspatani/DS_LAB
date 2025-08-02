@@ -1,34 +1,46 @@
-#include <stdio.h>
-
+#include<stdio.h>
 #define MAX 100
 
-// Function to input a matrix from the user
+// Function to input matrix
 void inputMatrix(int matrix[MAX][MAX], int rows, int cols) {
-    printf("Enter elements of %d×%d matrix:\n", rows, cols);
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            scanf("%d", &matrix[i][j]);
+            scanf("%d", &matrix[i][j]);  // Corrected to take one input per element
         }
     }
 }
 
-// Convert matrix to compact form, return non-zero count
+// Function to display the matrix in normal 2D form
+void displayMatrix(int matrix[MAX][MAX], int rows, int cols) {
+    printf("\nOriginal Matrix:\n");
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%d ", matrix[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+// Function to convert matrix to compact form
 int toCompact(int rows, int cols, int matrix[MAX][MAX], int compact[MAX][3]) {
     int size = 0;
+
     // Count non-zero elements
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            if (matrix[i][j] != 0)
+            if (matrix[i][j] != 0) {
                 size++;
+            }
         }
     }
 
-    // First row contains metadata
+    // Convert to compact form
     compact[0][0] = rows;
     compact[0][1] = cols;
     compact[0][2] = size;
-
     int k = 1;
+
+    // Store non-zero elements in compact format
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
             if (matrix[i][j] != 0) {
@@ -43,15 +55,15 @@ int toCompact(int rows, int cols, int matrix[MAX][MAX], int compact[MAX][3]) {
     return size;
 }
 
-// Display a compact matrix
+// Display the compact matrix
 void displayCompact(int compact[MAX][3], int size) {
     printf("Row  Col  Val\n");
-    for (int i = 0; i <= size; i++) {
-        printf("%3d  %3d  %3d\n", compact[i][0], compact[i][1], compact[i][2]);
+    for (int i = 0; i <= size; i++) {  
+        printf("%d  %d  %d\n", compact[i][0], compact[i][1], compact[i][2]);
     }
 }
 
-// Add two compact matrices
+// Function to add two compact matrices
 int addCompact(int a[MAX][3], int b[MAX][3], int result[MAX][3]) {
     int i = 1, j = 1, k = 1;
     int sizeA = a[0][2], sizeB = b[0][2];
@@ -96,11 +108,11 @@ int addCompact(int a[MAX][3], int b[MAX][3], int result[MAX][3]) {
         k++;
     }
 
-    result[0][2] = k - 1;
+    result[0][2] = k - 1;  // Update the size of result
     return k - 1;
 }
 
-// Transpose a compact matrix
+// Function to transpose a compact matrix
 void transposeCompact(int compact[MAX][3], int transposed[MAX][3]) {
     int rows = compact[0][0];
     int cols = compact[0][1];
@@ -139,14 +151,17 @@ int main() {
     printf("\nMatrix B:\n");
     inputMatrix(matrixB, rows, cols);
 
-    // Convert to compact
+    // Display original matrices (sparse matrix)
+    displayMatrix(matrixA, rows, cols);
+    displayMatrix(matrixB, rows, cols);
+
+    // Convert to compact form
     int sizeA = toCompact(rows, cols, matrixA, compactA);
     int sizeB = toCompact(rows, cols, matrixB, compactB);
 
     // Display compact forms
     printf("\nCompact form of Matrix A:\n");
     displayCompact(compactA, sizeA);
-
     printf("\nCompact form of Matrix B:\n");
     displayCompact(compactB, sizeB);
 
