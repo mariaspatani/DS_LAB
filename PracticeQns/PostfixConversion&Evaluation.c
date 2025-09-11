@@ -1,26 +1,24 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h> // For exit()
-#include <ctype.h>  // For isdigit() and isalnum()
+#include <ctype.h>
+#include <stdlib.h>
 
 #define MAX_SIZE 100
 
-// ===================================
-// STACK FOR INFIX TO POSTFIX CONVERSION (CHARACTERS)
-// ===================================
+// STACK for CHARACTERS
+
 char charStack[MAX_SIZE];
 int charTop = -1;
 
-void charPush(char value) {
+void charPush(char c) {
     if (charTop >= MAX_SIZE - 1) {
         printf("Character stack overflow\n");
         exit(1);
     }
-    charStack[++charTop] = value;
+    charStack[++charTop] = c;
 }
 
 char charPop() {
-    if (charTop < 0) {
+    if (charTop == -1) {
         printf("Character stack underflow\n");
         exit(1);
     }
@@ -28,9 +26,7 @@ char charPop() {
 }
 
 char charPeek() {
-    if (charTop < 0) {
-        return '\0';
-    }
+    if (charTop == -1) return '\0';
     return charStack[charTop];
 }
 
@@ -38,9 +34,9 @@ int isCharStackEmpty() {
     return charTop == -1;
 }
 
-// ===================================
-// STACK FOR POSTFIX EVALUATION (INTEGERS)
-// ===================================
+
+// STACK for INTEGERS
+
 int intStack[MAX_SIZE];
 int intTop = -1;
 
@@ -53,120 +49,150 @@ void intPush(int value) {
 }
 
 int intPop() {
-    if (intTop < 0) {
+    if (intTop == -1) {
         printf("Integer stack underflow\n");
         exit(1);
     }
     return intStack[intTop--];
 }
 
-// ===================================
-// HELPER FUNCTIONS
-// ===================================
 
 int precedence(char symbol) {
-    switch (symbol) {
-        case '^': return 3;
-        case '*':
-        case '/': return 2;
-        case '+':
-        case '-': return 1;
-        default: return 0;
-    }
+    if (symbol == '^') return 3;
+    else if (symbol == '*' || symbol == '/') return 2;
+    else if (symbol == '+' || symbol == '-') return 1;
+    else return 0;
 }
 
-// Custom integer power function
 int intPower(int base, int exp) {
     int result = 1;
-    for (int i = 0; i < exp; ++i) {
-        result *= base;
-    }
+    for (int i = 0; i < exp; i++) result *= base;
     return result;
 }
 
-// ===================================
-// MAIN LOGIC
-// ===================================
 
-void infixToPostfix(char *infix, char *postfix) {
-    int i, j = 0;
-    for (i = 0; i < strlen(infix); i++) {
-        char symbol = infix[i];
-        
-        if (isalnum(symbol)) {
-            postfix[j++] = symbol;
-        } else if (symbol == '(') {
-            charPush('(');
-        } else if (symbol == ')') {
+// INFIX → POSTFIX
+
+void infixToPostfix(char infix[], char postfix[]) {
+    int i = 0, j = 0;
+
+    while (infix[i] != '\0') {
+        char c = infix[i];
+
+        if (isdigit(c)) { // read full number
+            while (isdigit(infix[i])) {
+                postfix[j++] = infix[i++];
+            }
+            postfix[j++] = ' ';
+            continue;
+        } 
+        else if (isalpha(c)) { // variable (a,b,x,y…)
+            postfix[j++] = c;
+            postfix[j++] = ' ';
+        } 
+        else if (c == '(') {
+            charPush(c);
+        } 
+        else if (c == ')') {
             while (!isCharStackEmpty() && charPeek() != '(') {
                 postfix[j++] = charPop();
+                postfix[j++] = ' ';
             }
-            if (!isCharStackEmpty()) {
-                charPop(); // Pop the '('
-            }
-        } else { // Operator
-            while (!isCharStackEmpty() && precedence(charPeek()) >= precedence(symbol)) {
-                // Correct logic for right-to-left associativity of '^'
-                if (precedence(charPeek()) == precedence(symbol) && symbol == '^') {
-                    break;
-                }
+            if (!isCharStackEmpty()) charPop(); // pop '('
+        } 
+        else { // operator
+            while (!isCharStackEmpty() && precedence(charPeek()) >= precedence(c)) {
+                if (precedence(charPeek()) == precedence(c) && c == '^') break;
                 postfix[j++] = charPop();
+                postfix[j++] = ' ';
             }
-            charPush(symbol);
+            charPush(c);
         }
+        i++;
     }
 
     while (!isCharStackEmpty()) {
         postfix[j++] = charPop();
+        postfix[j++] = ' ';
     }
+
     postfix[j] = '\0';
 }
 
-int postEval(char *postfix) {
-    int i;
-    for (i = 0; i < strlen(postfix); i++) {
-        char symbol = postfix[i];
 
-        if (isdigit(symbol)) {
-            intPush(symbol - '0');
-        } else {
-            int a = intPop();
-            int b = intPop();
-            
-            switch (symbol) {
-                case '^': intPush(intPower(b, a)); break;
-                case '*': intPush(b * a); break;
+// POSTFIX EVALUATION (only for numbers)
+
+int evaluatePostfix(char postfix[]) {
+    int i = 0;
+
+    while (postfix[i] != '\0') {
+        if (isdigit(postfix[i])) {
+            int num = 0;
+            while (isdigit(postfix[i])) {
+                num = num * 10 + (postfix[i] - '0');
+                i++;
+            }
+            intPush(num);
+        } 
+        else if (postfix[i] == ' ') {
+            i++;
+            continue;
+        } 
+        else if (isalpha(postfix[i])) {
+            printf("Variable '%c' found → cannot evaluate without value.\n", postfix[i]);
+            exit(1);
+        } 
+        else {
+            int val2 = intPop();
+            int val1 = intPop();
+
+            switch (postfix[i]) {
+                case '+': intPush(val1 + val2); break;
+                case '-': intPush(val1 - val2); break;
+                case '*': intPush(val1 * val2); break;
                 case '/':
-                    if (a == 0) {
+                    if (val2 == 0) {
                         printf("Division by zero error\n");
                         exit(1);
                     }
-                    intPush(b / a); 
+                    intPush(val1 / val2);
                     break;
-                case '+': intPush(b + a); break;
-                case '-': intPush(b - a); break;
+                case '^': intPush(intPower(val1, val2)); break;
             }
+            i++;
         }
     }
+
     return intPop();
 }
 
-void displayPost(char *postfix) {
-    printf("Postfix expression: %s\n", postfix);
-}
+
+// MAIN
 
 int main() {
-    char infix[MAX_SIZE];
-    char postfix[MAX_SIZE];
-    
-    printf("Enter the infix expression (single-digit operands): ");
-    scanf("%s", infix);
-    
+    char infix[MAX_SIZE], postfix[MAX_SIZE];
+
+    printf("Enter Infix Expression (numbers + variables allowed): ");
+    scanf("%[^\n]", infix);
+
     infixToPostfix(infix, postfix);
-    displayPost(postfix);
-    
-    int result = postEval(postfix);
-    printf("Evaluated Postfix: %d\n", result);
-    
+    printf("Postfix Expression: %s\n", postfix);
+
+    // Try evaluation only if there are no variables
+    int hasVariable = 0;
+    for (int k = 0; postfix[k] != '\0'; k++) {
+        if (isalpha(postfix[k])) {
+            hasVariable = 1;
+            break;
+        }
+    }
+
+    if (!hasVariable) {
+        int result = evaluatePostfix(postfix);
+        printf("Evaluated Result: %d\n", result);
+    } else {
+        printf("Expression contains variables → cannot evaluate numerically.\n");
+    }
+
     return 0;
 }
