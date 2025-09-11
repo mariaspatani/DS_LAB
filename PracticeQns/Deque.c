@@ -1,7 +1,7 @@
 #include <stdio.h>
 
-int deque[100];   // Fixed size array
-int MAX;          // User-defined maximum size
+int deque[100];   
+int MAX;          
 int front = -1, rear = -1;
 
 void insertFront(int value) {
@@ -102,20 +102,24 @@ int main() {
                 printf("Enter value to insert at front: ");
                 scanf("%d", &value);
                 insertFront(value);
+                display();
                 break;
             case 2:
                 printf("Enter value to insert at rear: ");
                 scanf("%d", &value);
                 insertRear(value);
+                display(); 
                 break;
             case 3:
                 deleteFront();
+                display(); 
                 break;
             case 4:
                 deleteRear();
+                display(); 
                 break;
             case 5:
-                display();
+                display(); 
                 break;
             case 6:
                 return 0;
