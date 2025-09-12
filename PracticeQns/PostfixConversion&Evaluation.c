@@ -35,25 +35,25 @@ int isCharStackEmpty() {
 }
 
 
-// STACK for INTEGERS
+// STACK for FLOATING-POINT NUMBERS
 
-int intStack[MAX_SIZE];
-int intTop = -1;
+float floatStack[MAX_SIZE];
+int floatTop = -1;
 
-void intPush(int value) {
-    if (intTop >= MAX_SIZE - 1) {
-        printf("Integer stack overflow\n");
+void floatPush(float value) {
+    if (floatTop >= MAX_SIZE - 1) {
+        printf("Float stack overflow\n");
         exit(1);
     }
-    intStack[++intTop] = value;
+    floatStack[++floatTop] = value;
 }
 
-int intPop() {
-    if (intTop == -1) {
-        printf("Integer stack underflow\n");
+float floatPop() {
+    if (floatTop == -1) {
+        printf("Float stack underflow\n");
         exit(1);
     }
-    return intStack[intTop--];
+    return floatStack[floatTop--];
 }
 
 
@@ -64,8 +64,8 @@ int precedence(char symbol) {
     else return 0;
 }
 
-int intPower(int base, int exp) {
-    int result = 1;
+float floatPower(float base, float exp) {
+    float result = 1;
     for (int i = 0; i < exp; i++) result *= base;
     return result;
 }
@@ -80,7 +80,7 @@ void infixToPostfix(char infix[], char postfix[]) {
         char c = infix[i];
 
         if (isdigit(c)) { // read full number
-            while (isdigit(infix[i])) {
+            while (isdigit(infix[i]) || infix[i] == '.') {
                 postfix[j++] = infix[i++];
             }
             postfix[j++] = ' ';
@@ -120,19 +120,28 @@ void infixToPostfix(char infix[], char postfix[]) {
 }
 
 
-// POSTFIX EVALUATION (only for numbers)
+// POSTFIX EVALUATION (for floating-point numbers)
 
-int evaluatePostfix(char postfix[]) {
+float evaluatePostfix(char postfix[]) {
     int i = 0;
 
     while (postfix[i] != '\0') {
-        if (isdigit(postfix[i])) {
-            int num = 0;
+        if (isdigit(postfix[i]) || postfix[i] == '.') {
+            float num = 0;
+            float decimalPlace = 1;
+
             while (isdigit(postfix[i])) {
                 num = num * 10 + (postfix[i] - '0');
                 i++;
             }
-            intPush(num);
+            if (postfix[i] == '.') {
+                i++;
+                while (isdigit(postfix[i])) {
+                    num = num + (postfix[i] - '0') / (decimalPlace *= 10);
+                    i++;
+                }
+            }
+            floatPush(num);
         } 
         else if (postfix[i] == ' ') {
             i++;
@@ -143,27 +152,27 @@ int evaluatePostfix(char postfix[]) {
             exit(1);
         } 
         else {
-            int val2 = intPop();
-            int val1 = intPop();
+            float val2 = floatPop();
+            float val1 = floatPop();
 
             switch (postfix[i]) {
-                case '+': intPush(val1 + val2); break;
-                case '-': intPush(val1 - val2); break;
-                case '*': intPush(val1 * val2); break;
+                case '+': floatPush(val1 + val2); break;
+                case '-': floatPush(val1 - val2); break;
+                case '*': floatPush(val1 * val2); break;
                 case '/':
                     if (val2 == 0) {
                         printf("Division by zero error\n");
                         exit(1);
                     }
-                    intPush(val1 / val2);
+                    floatPush(val1 / val2);
                     break;
-                case '^': intPush(intPower(val1, val2)); break;
+                case '^': floatPush(floatPower(val1, val2)); break;
             }
             i++;
         }
     }
 
-    return intPop();
+    return floatPop();
 }
 
 
@@ -188,8 +197,8 @@ int main() {
     }
 
     if (!hasVariable) {
-        int result = evaluatePostfix(postfix);
-        printf("Evaluated Result: %d\n", result);
+        float result = evaluatePostfix(postfix);
+        printf("Evaluated Result: %.2f\n", result);
     } else {
         printf("Expression contains variables → cannot evaluate numerically.\n");
     }
