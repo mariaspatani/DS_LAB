@@ -1,11 +1,35 @@
 #include <stdio.h>
-#define MAX 5
 
-void displayQueue(int queue[], int front, int rear) {
-    if (front == -1 || front > rear) {
-        printf("Queue is empty\n");
+#define MAX_SIZE 100  
+
+int queue[MAX_SIZE]; 
+int front = -1, rear = -1;
+
+void enqueue(int value, int size) {
+    if (rear == size - 1) {
+        printf("Queue is full (Overflow).\n");
     } else {
-        printf("Current queue: ");
+        if (front == -1) front = 0;
+        rear++;
+        queue[rear] = value;
+        printf("%d enqueued to the queue.\n", value);
+    }
+}
+
+void dequeue() {
+    if (front == -1 || front > rear) {
+        printf("Queue is empty (Underflow).\n");
+    } else {
+        printf("%d dequeued from the queue.\n", queue[front]);
+        front++;
+    }
+}
+
+void display() {
+    if (front == -1 || front > rear) {
+        printf("Queue is empty.\n");
+    } else {
+        printf("Queue elements: ");
         for (int i = front; i <= rear; i++) {
             printf("%d ", queue[i]);
         }
@@ -14,55 +38,45 @@ void displayQueue(int queue[], int front, int rear) {
 }
 
 int main() {
-    int queue[MAX];
-    int front = -1, rear = -1;
-    int value;
-
-    // ENQUEUE
-    printf("Enter the 5 elements to insert into the queue: \n");
-    for (int i = 0; i < MAX; i++) {
-        if (rear == MAX - 1) {
-            printf("Queue is full\n");
-            break;
-        } else {
-            if (front == -1)
-                front = 0; // First element inserted
-            printf("Enter value to insert: ");
-            scanf("%d", &value);
-            rear++;
-            queue[rear] = value;
-            printf("Inserted %d\n", value);
-            // Display current state of the queue
-            displayQueue(queue, front, rear);
-        }
+    int choice, value, size;
+    printf("Enter the maximum number of elements you want in the queue (up to %d): ", MAX_SIZE);
+    scanf("%d", &size);
+    
+    if (size > MAX_SIZE) {
+        printf("Invalid size. Maximum size allowed is %d.\n", MAX_SIZE);
+        return -1;  
     }
 
-    // DEQUEUE
-    int n;  // Number of elements to delete from the queue
-    printf("\nEnter the number of elements to delete from the queue: ");
-    scanf("%d", &n);
+    do {
+        printf("\n--- Queue Menu ---\n");
+        printf("1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
 
-    for (int i = 0; i < n; i++) {
-        if (front == -1 || front > rear) {
-            printf("Queue is empty\n");
-            break;
-        } else {
-            printf("Deleted element: %d\n", queue[front]);
-            front++;
-            displayQueue(queue, front, rear);
-        }
-    }
+        switch(choice) {
+            case 1:
+                printf("Enter value to enqueue: ");
+                scanf("%d", &value);
+                enqueue(value, size);
+                break;
 
-    // DISPLAY remaining elements
-    if (front == -1 || front > rear) {
-        printf("\nQueue is now empty\n");
-    } else {
-        printf("\nRemaining elements in the queue: ");
-        for (int i = front; i <= rear; i++) {
-            printf("%d ", queue[i]);
+            case 2:
+                dequeue();
+                break;
+
+            case 3:
+                display();
+                break;
+
+            case 4:
+                printf("Exiting.\n");
+                break;
+
+            default:
+                printf("Invalid choice. Try again.\n");
         }
-        printf("\n");
-    }
+
+    } while(choice != 4);
 
     return 0;
 }
