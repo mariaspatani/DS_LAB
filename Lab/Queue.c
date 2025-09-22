@@ -39,7 +39,7 @@ void display() {
 
 int main() {
     int choice, value, size;
-    printf("Enter the maximum number of elements you want in the queue (up to %d): ", MAX_SIZE);
+    printf("Enter the maximum number of elements you want in the queue : ", MAX_SIZE);
     scanf("%d", &size);
     
     if (size > MAX_SIZE) {
@@ -49,7 +49,7 @@ int main() {
 
     do {
         printf("\n--- Queue Menu ---\n");
-        printf("1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\n");
+        printf("1. Enqueue\n2. Dequeue\n3. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -58,17 +58,15 @@ int main() {
                 printf("Enter value to enqueue: ");
                 scanf("%d", &value);
                 enqueue(value, size);
+                display();
                 break;
 
             case 2:
                 dequeue();
-                break;
-
-            case 3:
                 display();
                 break;
 
-            case 4:
+            case 3:
                 printf("Exiting.\n");
                 break;
 
