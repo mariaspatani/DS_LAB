@@ -40,7 +40,7 @@ int main() {
 
     do {
         printf("\n--- Queue Menu ---\n");
-        printf("1. Enqueue\n2. Dequeue\n3. Display\n4. Exit\n");
+        printf("1. Enqueue\n2. Dequeue\n3. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
 
@@ -49,17 +49,16 @@ int main() {
                 printf("Enter value to enqueue: ");
                 scanf("%d", &value);
                 enqueue(value);
+                display();
                 break;
 
             case 2:
                 dequeue();
-                break;
-
-            case 3:
                 display();
                 break;
 
-            case 4:
+
+            case 3:
                 printf("Exiting.\n");
                 break;
 
