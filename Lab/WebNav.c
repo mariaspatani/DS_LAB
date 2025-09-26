@@ -19,6 +19,11 @@ void visitPage(char url[]) {
     if (current != NULL) {
         // Clear forward history
         struct Node *temp = current->next;
+        while (temp) {
+            struct Node *del = temp;
+            temp = temp->next;
+            free(del);
+        }
         current->next = NULL;=
         // Link new node
         newNode->prev = current;
