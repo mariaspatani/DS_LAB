@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 // Node = memory block
 struct Node {
     int size;                 
