@@ -1,82 +1,70 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Node definition
-struct Node {
+typedef struct Node {
     int data;
-    struct Node *left, *right;
-};
+    struct Node *left;
+    struct Node *right;
+} Node;
 
-// Function to create a new node
-struct Node* createNode(int value) {
-    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+Node* createNode(int value) {
+    Node* newNode = (Node*)malloc(sizeof(Node));
     newNode->data = value;
-    newNode->left = newNode->right = NULL;
+    newNode->left = NULL;
+    newNode->right = NULL;
     return newNode;
 }
 
-// Insertion in BST
-struct Node* insert(struct Node* root, int value) {
+Node* insertNode(Node* root, int value) {
     if (root == NULL)
         return createNode(value);
-
     if (value < root->data)
-        root->left = insert(root->left, value);
+        root->left = insertNode(root->left, value);
     else if (value > root->data)
-        root->right = insert(root->right, value);
-
+        root->right = insertNode(root->right, value);
     return root;
 }
 
-// Search in BST
-struct Node* search(struct Node* root, int key) {
+Node* searchNode(Node* root, int key) {
     if (root == NULL || root->data == key)
         return root;
-
     if (key < root->data)
-        return search(root->left, key);
-    else
-        return search(root->right, key);
+        return searchNode(root->left, key);
+    return searchNode(root->right, key);
 }
 
-// Find minimum node (used in deletion)
-struct Node* findMin(struct Node* root) {
-    while (root && root->left != NULL)
-        root = root->left;
-    return root;
+Node* findMinValueNode(Node* node) {
+    Node* current = node;
+    while (current && current->left != NULL)
+        current = current->left;
+    return current;
 }
 
-// Deletion in BST
-struct Node* deleteNode(struct Node* root, int key) {
+Node* deleteNode(Node* root, int key) {
     if (root == NULL)
         return root;
-
     if (key < root->data)
         root->left = deleteNode(root->left, key);
     else if (key > root->data)
         root->right = deleteNode(root->right, key);
     else {
-        // Node found
         if (root->left == NULL) {
-            struct Node* temp = root->right;
+            Node* temp = root->right;
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            Node* temp = root->left;
             free(root);
             return temp;
         }
-        else if (root->right == NULL) {
-            struct Node* temp = root->left;
-            free(root);
-            return temp;
-        }
-        // Node with two children
-        struct Node* temp = findMin(root->right);
+        Node* temp = findMinValueNode(root->right);
         root->data = temp->data;
         root->right = deleteNode(root->right, temp->data);
     }
     return root;
 }
 
-// Inorder traversal
-void inorder(struct Node* root) {
+void inorder(Node* root) {
     if (root != NULL) {
         inorder(root->left);
         printf("%d ", root->data);
@@ -85,53 +73,53 @@ void inorder(struct Node* root) {
 }
 
 int main() {
-    struct Node* root = NULL;
-    int choice, value, key;
-    struct Node* result;
-
+    Node* root = NULL;
+    int choice, value;
     while (1) {
-        printf("\n--- Binary Search Tree Menu ---\n");
-        printf("1. Insert\n2. Search\n3. Delete\n4. Display (Inorder)\n5. Exit\n");
+        printf("\n\n--- Binary Search Tree Operations ---\n");
+        printf("1. Insert\n");
+        printf("2. Delete\n");
+        printf("3. Search\n");
+        printf("4. Exit\n");
         printf("Enter your choice: ");
         scanf("%d", &choice);
-
         switch (choice) {
-        case 1:
-            printf("Enter value to insert: ");
-            scanf("%d", &value);
-            root = insert(root, value);
-            break;
-
-        case 2:
-            printf("Enter value to search: ");
-            scanf("%d", &key);
-            result = search(root, key);
-            if (result != NULL)
-                printf("%d found in BST\n", key);
-            else
-                printf("%d not found in BST\n", key);
-            break;
-
-        case 3:
-            printf("Enter value to delete: ");
-            scanf("%d", &key);
-            root = deleteNode(root, key);
-            printf("%d deleted (if it existed)\n", key);
-            break;
-
-        case 4:
-            printf("BST (Inorder): ");
-            inorder(root);
-            printf("\n");
-            break;
-
-        case 5:
-            exit(0);
-
-        default:
-            printf("Invalid choice! Try again.\n");
+            case 1:
+                printf("Enter value to insert: ");
+                scanf("%d", &value);
+                root = insertNode(root, value);
+                printf("%d inserted successfully.\n", value);
+                printf("Inorder Traversal: ");
+                inorder(root);
+                printf("\n");
+                break;
+            case 2:
+                printf("Enter value to delete: ");
+                scanf("%d", &value);
+                if (searchNode(root, value) != NULL) {
+                    root = deleteNode(root, value);
+                    printf("%d deleted successfully.\n", value);
+                } else {
+                    printf("%d not found in the tree.\n", value);
+                }
+                printf("Inorder Traversal: ");
+                inorder(root);
+                printf("\n");
+                break;
+            case 3:
+                printf("Enter value to search: ");
+                scanf("%d", &value);
+                if (searchNode(root, value) != NULL)
+                    printf("%d found in the tree.\n", value);
+                else
+                    printf("%d not found in the tree.\n", value);
+                break;
+            case 4:
+                printf("Exiting program.\n");
+                exit(0);
+            default:
+                printf("Invalid choice. Please try again.\n");
         }
     }
-
     return 0;
 }
